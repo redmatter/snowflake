@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"reflect"
 	"testing"
+	"time"
 )
 
 //******************************************************************************
@@ -21,6 +22,25 @@ func TestNewNode(t *testing.T) {
 		t.Fatalf("no error creating NewNode, %s", err)
 	}
 
+}
+
+// The very first ID from a Node should have step bits set to 0.
+func TestFirstGenerateIsAbsoluteZero(t *testing.T) {
+	epoch := time.Now().UnixNano() / 1000000
+	node, err := NewNodeWithConfig(0, Config{
+		Epoch:    epoch,
+		NodeBits: 10,
+		StepBits: 12,
+	})
+
+	if err != nil {
+		t.Fatalf("error initialising Node; err:%v", err)
+	}
+
+	id := node.Generate()
+	if id != 0 {
+		t.Fatalf("ID expected to be 0; got %d", id)
+	}
 }
 
 // lazy check if Generate will create duplicate IDs
@@ -47,7 +67,7 @@ func TestRace(t *testing.T) {
 	go func() {
 		for i := 0; i < 1000000000; i++ {
 
-			NewNode(1)
+			_, _ = NewNode(1)
 		}
 	}()
 
@@ -327,13 +347,13 @@ func TestMarshalJSON(t *testing.T) {
 	id := ID(13587)
 	expected := "\"13587\""
 
-	bytes, err := id.MarshalJSON()
+	json, err := id.MarshalJSON()
 	if err != nil {
 		t.Fatalf("Unexpected error during MarshalJSON")
 	}
 
-	if string(bytes) != expected {
-		t.Fatalf("Got %s, expected %s", string(bytes), expected)
+	if string(json) != expected {
+		t.Fatalf("Got %s, expected %s", string(json), expected)
 	}
 }
 
@@ -382,7 +402,7 @@ func BenchmarkParseBase32(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		ParseBase32([]byte(b32i))
+		_, _ = ParseBase32([]byte(b32i))
 	}
 }
 func BenchmarkBase32(b *testing.B) {
@@ -407,7 +427,7 @@ func BenchmarkParseBase58(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		ParseBase58([]byte(b58))
+		_, _ = ParseBase58([]byte(b58))
 	}
 }
 func BenchmarkBase58(b *testing.B) {
@@ -436,9 +456,10 @@ func BenchmarkGenerate(b *testing.B) {
 
 func BenchmarkGenerateMaxSequence(b *testing.B) {
 
-	NodeBits = 1
-	StepBits = 21
-	node, _ := NewNode(1)
+	node, _ := NewNodeWithConfig(1, Config{
+		NodeBits: 1,
+		StepBits: 21,
+	})
 
 	b.ReportAllocs()
 
@@ -448,18 +469,60 @@ func BenchmarkGenerateMaxSequence(b *testing.B) {
 	}
 }
 
+func BenchmarkGenerateN(b *testing.B) {
+	node, _ := NewNodeWithConfig(1, Config{
+		NodeBits:      10,
+		StepBits:      12,
+		MaxOverflowMs: 1000,
+	})
+
+	b.ReportAllocs()
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		_, _ = node.GenerateN(50000)
+	}
+}
+
+func BenchmarkGenerateNIterate(b *testing.B) {
+	node, _ := NewNodeWithConfig(1, Config{
+		NodeBits:      10,
+		StepBits:      12,
+		MaxOverflowMs: 1000,
+	})
+
+	b.ReportAllocs()
+
+	var total int64
+	var id ID
+	var more bool
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		ids, _ := node.GenerateN(50000)
+		total += ids.N
+		itr := NewBlockIterator(ids)
+		for {
+			id, more = itr.Next()
+			if !more {
+				break
+			}
+		}
+	}
+	_ = id
+}
+
 func BenchmarkUnmarshal(b *testing.B) {
 	// Generate the ID to unmarshal
 	node, _ := NewNode(1)
 	id := node.Generate()
-	bytes, _ := id.MarshalJSON()
+	json, _ := id.MarshalJSON()
 
 	var id2 ID
 
 	b.ReportAllocs()
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		_ = id2.UnmarshalJSON(bytes)
+		_ = id2.UnmarshalJSON(json)
 	}
 }
 

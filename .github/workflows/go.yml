@@ -19,6 +19,5 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           check-latest: true
-          cache: true
       - run: go build -v ./...
       - run: go test -v ./...

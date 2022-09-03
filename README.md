@@ -1,8 +1,8 @@
 snowflake
 ====
 [![GoDoc](https://godoc.org/github.com/redmatter/snowflake?status.svg)](https://godoc.org/github.com/redmatter/snowflake)
-[![Go report](http://goreportcard.com/badge/redmatter/snowflake)](http://goreportcard.com/report/redmatter/snowflake)
-[![Coverage](http://gocover.io/_badge/github.com/redmatter/snowflake)](https://gocover.io/github.com/redmatter/snowflake)
+[![Go Report](https://goreportcard.com/badge/github.com/redmatter/snowflake)](https://goreportcard.com/report/github.com/redmatter/snowflake)
+[![Coverage](https://gocover.io/_badge/github.com/redmatter/snowflake)](https://gocover.io/github.com/redmatter/snowflake)
 ![Build & Test](https://github.com/redmatter/snowflake/actions/workflows/go.yml/badge.svg)
 
 ### Features

@@ -5,6 +5,9 @@ snowflake
 [![Coverage](https://gocover.io/_badge/github.com/redmatter/snowflake)](https://gocover.io/github.com/redmatter/snowflake)
 [![Build & Test](https://github.com/redmatter/snowflake/actions/workflows/go.yml/badge.svg)](https://github.com/redmatter/snowflake/actions/)
 
+This is a fork of [snowflake by bwmarrin](https://github.com/bwmarrin/snowflake), with
+additional features to generate a block of IDs. 
+
 ### Features
 * A very simple Twitter snowflake generator.
 * Methods to parse existing snowflake IDs.

